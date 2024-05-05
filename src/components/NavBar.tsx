@@ -88,7 +88,7 @@ export const NavBar: React.FC = () => {
                     sx={{
                       textAlign: "center",
                       fontWeight: 600,
-                      color: (theme) => theme.palette.primary.dark,
+                      color: (theme) => theme.palette.text.primary,
                     }}
                   >
                     {name}
