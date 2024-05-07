@@ -19,8 +19,8 @@ export const FolderList: React.FC<FolderListProps> = ({
       sx={{
         width: "100%",
         maxWidth: 360,
-        bgcolor: "background.paper",
-        overflow: "auto",
+        bgcolor: "teal",
+        overflowY: "auto",
         maxHeight: 300,
       }}
     >

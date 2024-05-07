@@ -23,7 +23,16 @@ export const BUSelect: React.FC<BUSelectProps> = ({
 }) => {
   return (
     <FormControl error={error} fullWidth>
-      <InputLabel sx={{ color: "text.primary" }}>{label}</InputLabel>
+      <InputLabel
+        sx={{
+          color: "text.primary",
+          "& .MuiInputLabel-outlined": {
+            color: "text.primary",
+          },
+        }}
+      >
+        {label}
+      </InputLabel>
       <Select
         label={`${label}*`}
         value={value}
@@ -36,8 +45,14 @@ export const BUSelect: React.FC<BUSelectProps> = ({
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
             borderColor: "primary.light",
           },
+          "& .MuiInputLabel-outlined": {
+            color: "text.primary",
+          },
         }}
       >
+        <MenuItem key={0} value="">
+          <em>None</em>
+        </MenuItem>
         {options.map(({ buId, buName }) => (
           <MenuItem key={buId} value={buId} sx={{ color: "text.primary" }}>
             {buName}
