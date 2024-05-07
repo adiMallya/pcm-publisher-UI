@@ -1,15 +1,28 @@
 import { Button, Toolbar } from "@mui/material";
+import { useEffect } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { SiteLayout, BUSelect } from "src/components";
+import { CloneEntitySelection } from "src/components/CloneEntitySelection";
 import { BUList } from "src/helpers";
-import { IPublishFormInput } from "src/helpers/types";
+import {
+  IPublishFormInput,
+  IFolderResponse,
+  ICampaignResponse,
+  ICampaignRequest,
+} from "src/helpers/types";
+import {
+  fetchCampaignsForFolderIdByPage,
+  fetchFoldersByBUId,
+} from "src/services";
 import { theme } from "src/styles";
 
 export const Clone: React.FC = () => {
   const {
     control,
+    setValue,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<IPublishFormInput>({
     defaultValues: {
       sourceBU: "",
@@ -23,6 +36,32 @@ export const Clone: React.FC = () => {
 
   const onSubmit: SubmitHandler<IPublishFormInput> = (data) =>
     console.log(data);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const folders = await fetchFoldersByBUId(
+  //         "53F8CDC5-F8C9-4F2B-A7DD-75B24DD12773"
+  //       );
+  //       console.log("Folders: ", folders);
+
+  //       // Assuming you want to fetch campaigns for the first folder as an example
+  //       if (folders && folders.length > 0) {
+  //         const firstFolderId = folders[0].folderID;
+  //         const campaigns = await fetchCampaignsForFolderIdByPage({
+  //           folderID: firstFolderId,
+  //           pageNo: 0,
+  //           recordsPerPage: 10,
+  //         });
+  //         console.log("Campaigns: ", campaigns);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching data: ", error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
 
   return (
     <SiteLayout>
@@ -66,6 +105,16 @@ export const Clone: React.FC = () => {
             )}
           />
         </Toolbar>
+        {/* Here */}
+        <CloneEntitySelection
+          title=""
+          width="100%"
+          height="auto"
+          buId={watch("sourceBU")}
+          onSelectedCampaignChange={(campaignID) =>
+            setValue("sourceCampaignID", campaignID)
+          }
+        />
         <Button type="submit">Publish</Button>
       </form>
     </SiteLayout>
