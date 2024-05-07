@@ -7,9 +7,9 @@ export interface IPublishFormInput {
   sourceBU: string;
   targetBU: string;
   sourceCampaignID: string;
-  publishedCampaignName?: string;
-  targetFolder?: string;
-  targetCampaignId?: string;
+  publishedCampaignName: string;
+  targetFolder: string;
+  targetCampaignId?: string | null;
 }
 // Folders
 export interface IFolderResponse {
@@ -36,4 +36,13 @@ export interface ISearchCampaignRequest {
   pageNo: Number;
   recordsPerPage: number;
   searchName: string;
+}
+// PUBLISH
+export interface IPublishCloneRequest {
+  sourceBUID: string;
+  targetBUID: string;
+  sourceCampaignID: string;
+  targetCampaignName: string;
+  targetFolderID: string;
+  targetCampaignID: string | null;
 }
