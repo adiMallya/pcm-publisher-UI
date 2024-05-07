@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Paper } from "@mui/material";
+import { Box, Typography, LinearProgress, Stack } from "@mui/material";
 import { fetchFoldersByBUId } from "src/services";
 import { FolderList } from "./FolderList";
 import { CampaignsTable } from "./CampaignsTable";
@@ -7,16 +7,13 @@ import { IFolderResponse } from "src/helpers";
 
 interface CloneEntitySelectionProps {
   title?: string;
-  width: string;
-  height: string;
   buId: string | null;
   onSelectedCampaignChange: (campaignId: string) => void;
   onSelectedFolderChange?: (folderId: string) => void;
 }
 
 export const CloneEntitySelection: React.FC<CloneEntitySelectionProps> = ({
-  width,
-  height,
+  title,
   buId,
   onSelectedCampaignChange,
   onSelectedFolderChange,
@@ -28,12 +25,12 @@ export const CloneEntitySelection: React.FC<CloneEntitySelectionProps> = ({
     folders: [],
     isLoading: false,
   });
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [selectedFolderId, setSelectedFolderId] = useState<string>("");
 
   const handleSelectFolder = (folderId: string) => {
     setSelectedFolderId(folderId);
     if (onSelectedFolderChange) {
-      onSelectedFolderChange(folderId);
+      onSelectedFolderChange(selectedFolderId);
     }
   };
 
@@ -42,14 +39,17 @@ export const CloneEntitySelection: React.FC<CloneEntitySelectionProps> = ({
       const loadFolders = async () => {
         setEntityState((old) => ({ ...old, isLoading: true }));
         const fetchedFolders = await fetchFoldersByBUId(buId);
-        setEntityState((old) => ({ ...old, folders: fetchedFolders }));
-        setSelectedFolderId(fetchedFolders[0]?.folderID || null);
-        setEntityState((old) => ({ ...old, isLoading: true }));
+
+        if (fetchedFolders?.length) {
+          setEntityState((old) => ({ ...old, folders: fetchedFolders }));
+          setSelectedFolderId(fetchedFolders[0]?.folderID);
+        }
+        setEntityState((old) => ({ ...old, isLoading: false }));
       };
       loadFolders();
     } else {
       setEntityState((old) => ({ ...old, folders: [] }));
-      setSelectedFolderId(null);
+      setSelectedFolderId("");
     }
   }, [buId]);
 
@@ -58,26 +58,40 @@ export const CloneEntitySelection: React.FC<CloneEntitySelectionProps> = ({
   }
 
   return (
-    <Paper
-      style={{
-        width,
-        height,
+    <Box
+      component={"section"}
+      sx={{
+        backgroundColor: "primary",
         display: "flex",
-        flexDirection: "row",
-        padding: 16,
+        justifyContent: "space-around",
+        marginBottom: 1,
+        padding: 2,
       }}
     >
-      <FolderList
-        folders={entityState.folders}
-        selectedFolderId={selectedFolderId}
-        onSelectFolder={handleSelectFolder}
-      />
-      {selectedFolderId && (
-        <CampaignsTable
-          folderID={selectedFolderId}
-          onSelectCampaign={onSelectedCampaignChange}
-        />
+      {entityState.isLoading ? (
+        <LinearProgress />
+      ) : !entityState.folders.length ? (
+        <Typography variant="h5">{`No Folders Found For ${
+          title ?? "BU"
+        }`}</Typography>
+      ) : (
+        <Stack direction={"column"} gap={2}>
+          <Typography variant="h5">{title}</Typography>
+          <Box display={"flex"}>
+            <FolderList
+              folders={entityState.folders}
+              selectedFolderId={selectedFolderId}
+              onSelectFolder={handleSelectFolder}
+            />
+            {selectedFolderId && (
+              <CampaignsTable
+                folderID={selectedFolderId}
+                onSelectCampaign={onSelectedCampaignChange}
+              />
+            )}
+          </Box>
+        </Stack>
       )}
-    </Paper>
+    </Box>
   );
 };
