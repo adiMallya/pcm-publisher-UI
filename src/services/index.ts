@@ -61,19 +61,32 @@ export const searchCampaignsByName = async ({
 };
 
 export const publishToClone = async ({
-  targetCampaignID : receivedID,
+  targetCampaignID: receivedID,
   ...rest
 }: IPublishCloneRequest) => {
   try {
     const response = await axios.post(`${BASE_API}/publish/clone`, {
-      targetCampaignID: receivedID === '' && null,
-      ...rest      
+      targetCampaignID: receivedID === "" && null,
+      ...rest,
     });
     if (response.status !== 200)
       throw new Error(
         `Failed to publish, server responded with status: ${response.status}`
       );
     return response.data;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const fetchJobs = async () => {
+  try {
+    const response = await axios.get(`${BASE_API}/publish/status`);
+    if (response.status !== 200)
+      throw new Error(
+        `Failed to fetch Job statuses, server returned with status: ${response.status}`
+      );
+    return response.data.result;
   } catch (err) {
     console.error(err);
   }
