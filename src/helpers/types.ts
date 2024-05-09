@@ -9,7 +9,7 @@ export interface IPublishFormInput {
   sourceCampaignID: string;
   publishedCampaignName: string;
   targetFolder: string;
-  targetCampaignId?: string | null;
+  targetCampaignId: string;
 }
 // Folders
 export interface IFolderResponse {
