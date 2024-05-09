@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { LinearProgress, Paper, TextField } from "@mui/material";
+import { LinearProgress, Stack, Box, TextField, Button } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import {
-  DataGrid,
-  GridRowsProp,
   GridRowSelectionModel,
   GridPaginationModel,
   GridSlots,
 } from "@mui/x-data-grid";
+import { StyledDataGrid } from ".";
 
-import { ICampaignResponse, DataColumnList } from "src/helpers";
+import { DataColumnList } from "src/helpers";
 import {
   fetchCampaignsForFolderIdByPage,
   searchCampaignsByName,
@@ -23,18 +23,17 @@ export const CampaignsTable: React.FC<CampaignsTableProp> = ({
   folderID,
   onSelectCampaign,
 }) => {
-  //   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
   const [pageState, setPageState] = useState({
     isLoading: false,
     data: [],
     total: 10,
     page: 0,
-    rowsPerPage: 3,
+    rowsPerPage: 4,
     searchName: "",
   });
 
   const handleCampaignSelection = (selected: GridRowSelectionModel) => {
-    const selectedCampaignID = selected[0] as string;
+    const selectedCampaignID = selected.length ? (selected[0] as string) : "";
     onSelectCampaign(selectedCampaignID);
   };
 
@@ -48,9 +47,6 @@ export const CampaignsTable: React.FC<CampaignsTableProp> = ({
     }));
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) =>
-    setPageState((old) => ({ ...old, searchName: event.target.value }));
-
   useEffect(() => {
     const fetchCampaigns = async () => {
       setPageState((old) => ({ ...old, isLoading: true }));
@@ -61,7 +57,6 @@ export const CampaignsTable: React.FC<CampaignsTableProp> = ({
       });
 
       if (campaigns) {
-        console.log(campaigns.campaigns.length);
         setPageState((old) => ({
           ...old,
           data: campaigns?.campaigns,
@@ -72,44 +67,64 @@ export const CampaignsTable: React.FC<CampaignsTableProp> = ({
     };
 
     fetchCampaigns();
-  }, [folderID]);
+  }, [folderID, pageState.page, pageState.rowsPerPage]);
 
-  useEffect(() => {
-    const searchData = async () => {
-      setPageState((old) => ({ ...old, isLoading: true }));
-      const foundCampaigns = await searchCampaignsByName({
-        searchName: pageState.searchName,
-        folderID,
-        pageNo: pageState.page,
-        recordsPerPage: pageState.rowsPerPage,
-      });
-      if (foundCampaigns) {
-        setPageState((old) => ({
-          ...old,
-          data: foundCampaigns?.campaigns,
-          total: foundCampaigns?.totalRecords,
-        }));
-        setPageState((old) => ({ ...old, isLoading: false }));
-      }
-    };
-    searchData();
-  }, [pageState.searchName]);
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setPageState((old) => ({ ...old, searchName: event.target.value }));
+
+  const handleSearchClick = async () => {
+    setPageState((old) => ({ ...old, isLoading: true }));
+    const foundCampaigns = await searchCampaignsByName({
+      searchName: pageState.searchName,
+      folderID,
+      pageNo: pageState.page,
+      recordsPerPage: pageState.rowsPerPage,
+    });
+    if (foundCampaigns) {
+      setPageState((old) => ({
+        ...old,
+        data: foundCampaigns?.campaigns,
+        total: foundCampaigns?.totalRecords,
+        isLoading: false,
+      }));
+      setPageState((old) => ({ ...old, isLoading: false }));
+    }
+  };
 
   return (
-    <Paper style={{ height: 400, width: "100%", padding: 16 }}>
-      <TextField
-        label="Search by name"
-        variant="outlined"
-        value={pageState.searchName}
-        onChange={handleSearchChange}
-        fullWidth
-        margin="normal"
-      />
-      <DataGrid
+    <Box
+      style={{ maxHeight: 360, width: "100%", maxWidth: 520 }}
+      display={"flex"}
+      flexDirection={"column"}
+    >
+      <Stack direction={"row"}>
+        <TextField
+          label="Search by name"
+          variant="outlined"
+          value={pageState.searchName}
+          fullWidth
+          onChange={handleSearchChange}
+          sx={{
+            "& .MuiInputLabel-outlined": {
+              color: "text.primary",
+            },
+          }}
+        />
+        <Button
+          variant="outlined"
+          startIcon={<SearchIcon />}
+          onClick={handleSearchClick}
+        >
+          Search
+        </Button>
+      </Stack>
+
+      <StyledDataGrid
         autoHeight
         columns={DataColumnList}
         rows={pageState.data}
         getRowId={(row) => row.campaignID}
+        paginationMode="server"
         rowCount={pageState.total}
         initialState={{
           pagination: {
@@ -132,6 +147,6 @@ export const CampaignsTable: React.FC<CampaignsTableProp> = ({
           noRowsOverlay: NoRows,
         }}
       />
-    </Paper>
+    </Box>
   );
 };
